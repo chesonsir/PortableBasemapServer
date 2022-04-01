@@ -65,6 +65,10 @@ namespace PBS.Service
                     WebServiceHost host = new WebServiceHost(typeof(PBSServiceProvider), new Uri("http://localhost:" + port));
                     host.AddServiceEndpoint(typeof(IPBSServiceProvider), new WebHttpBinding(), "").Behaviors.Add(new WebHttpBehavior());
                     ServiceDebugBehavior stp = host.Description.Behaviors.Find<ServiceDebugBehavior>();
+
+                    foreach (ServiceEndpoint EP in host.Description.Endpoints)
+                        EP.Behaviors.Add(new BehaviorAttribute());
+
                     stp.HttpHelpPageEnabled = false;
                     host.Open();
 
