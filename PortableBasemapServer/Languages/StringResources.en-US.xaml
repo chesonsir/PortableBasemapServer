@@ -105,6 +105,7 @@ Are you sure to exit without saving?</sys:String>
     <sys:String x:Key="btnSave">Save</sys:String>
     <sys:String x:Key="btnLoad">Load</sys:String>
     <sys:String x:Key="btnDelete">Delete</sys:String>
+    <sys:String x:Key="selectAllMap">SelectAllMap</sys:String>
     <sys:String x:Key="gvheaderConfigName">ConfigName</sys:String>
     <sys:String x:Key="gvheaderServiceCount">ServiceCount</sys:String>
     <sys:String x:Key="gvheaderCreatedTime">CreatedTime</sys:String>

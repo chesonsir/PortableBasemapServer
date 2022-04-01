@@ -127,6 +127,7 @@
                     <Button Content="{DynamicResource btnSave}" Command="{Binding CMDClickProfileButton}" CommandParameter="SAVE" Margin="0,0,10,0" IsEnabled="{Binding IsIdle}" />
                     <Button Content="{DynamicResource btnLoad}" Command="{Binding CMDClickProfileButton}" CommandParameter="LOAD" Margin="0,0,10,0" IsEnabled="{Binding IsIdle}" />
                     <Button Content="{DynamicResource btnDelete}" Command="{Binding CMDClickProfileButton}" CommandParameter="DELETE" IsEnabled="{Binding IsIdle}" />
+                    <Button Content="{DynamicResource selectAllMap}" Command="{Binding CMDClickSelectAllMap}" CommandParameter="ALLMAP" Margin="20 0 0 0" Width="100"/>
                 </StackPanel>
                 <Grid>
                     <!--level textblock-->

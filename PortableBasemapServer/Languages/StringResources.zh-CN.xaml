@@ -102,6 +102,7 @@ http://www.mbtiles.org
     <sys:String x:Key="btnSave">保存</sys:String>
     <sys:String x:Key="btnLoad">载入</sys:String>
     <sys:String x:Key="btnDelete">删除</sys:String>
+    <sys:String x:Key="selectAllMap">选中整张地图</sys:String>
     <sys:String x:Key="gvheaderConfigName">配置名称</sys:String>
     <sys:String x:Key="gvheaderServiceCount">服务数量</sys:String>
     <sys:String x:Key="gvheaderCreatedTime">创建时间</sys:String>

@@ -1,23 +1,23 @@
-﻿using System;
-using System.ComponentModel;
-using System.Linq.Expressions;
-using System.Collections.ObjectModel;
-using PBS.DataSource;
-using System.Windows.Input;
-using PBS.APP.Classes;
-using System.Windows.Forms;
+﻿using ESRI.ArcGIS.Client;
 using ESRI.ArcGIS.Client.Geometry;
-using ESRI.ArcGIS.Client;
+using ESRI.ArcGIS.Client.Projection;
+using ESRI.ArcGIS.Client.Symbols;
+using PBS.APP.Classes;
+using PBS.DataSource;
 using PBS.Service;
-using System.ServiceModel.Web;
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
 using System.ServiceModel;
 using System.ServiceModel.Description;
-using ESRI.ArcGIS.Client.Symbols;
+using System.ServiceModel.Web;
+using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
-using ESRI.ArcGIS.Client.Projection;
-using System.IO;
 using Vishcious.ArcGIS.SLContrib;
-using System.Linq;
 
 namespace PBS.APP.ViewModels
 {
@@ -190,6 +190,7 @@ namespace PBS.APP.ViewModels
         public ICommand CMDClickBrowseButton { get; private set; }
         public ICommand CMDClickStartButton { get; private set; }
         public ICommand CMDClickProfileButton { get; private set; }
+        public ICommand CMDClickSelectAllMap { get; private set; }
 
         public VMConvertOnlineToMBTiles(Map esriMap,int port)
         {
@@ -238,6 +239,7 @@ namespace PBS.APP.ViewModels
             CMDClickBrowseButton = new DelegateCommand(BrowseButtonClicked);
             CMDClickStartButton = new DelegateCommand(StartButtonClicked, (p) => { return !string.IsNullOrEmpty(Output)&&DownloadExtent!=null&&(Levels!=null&&Levels.Length>0)&&IsIdle; });
             CMDClickProfileButton = new DelegateCommand(ProfileButtonClicked, (p) => { return !string.IsNullOrEmpty(SelectedProfile); });
+            CMDClickSelectAllMap = new DelegateCommand(SelectAllMapButtonClicked, _ => IsIdle);
             IsIdle = true;
             SelectedIndexOfDrawExtentMethod = 0;
             Profiles = new ObservableCollection<string>(_configManager.GetAllDownloadProfileNames());
@@ -269,6 +271,35 @@ namespace PBS.APP.ViewModels
             #endregion
         }
 
+        /// <summary>
+        /// 选中整张地图进行下载
+        /// </summary>
+        private void SelectAllMapButtonClicked(object parameters)
+        {
+            //Console.WriteLine($"{_map.Width} {_map.ActualWidth} {_map.Height} {_map.ActualHeight}");
+
+            DownloadExtent = new Envelope { XMin = 0, YMin = -89.99, XMax = 359.99, YMax = 89.99 };
+
+            var g = new Graphic
+            {
+                Symbol = new SimpleFillSymbol()
+                {
+                    BorderBrush = new SolidColorBrush(Colors.Red),
+                    Fill = new SolidColorBrush(Color.FromArgb(100, 255, 0, 0))
+                }
+            };
+            g.Geometry = _webMercator.FromGeographic(DownloadExtent);
+            _graphicsLayer.Graphics.Add(g);
+
+            if (Levels != null && Levels.Length > 0)
+            {
+                TilesCount = AppUtility.CalculateTileCount(Levels, (Envelope)g.Geometry);
+            }
+
+            NotifyPropertyChanged(p => p.DownloadExtent);
+            NotifyPropertyChanged(p => p.IsDrawExtentTipVisible);
+        }
+
         void MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (_isRightMouseButtonDown&&IsIdle)
@@ -282,7 +313,12 @@ namespace PBS.APP.ViewModels
                 {
                     TilesCount = AppUtility.CalculateTileCount(Levels, (Envelope)g.Geometry);
                 }
-                DownloadExtent = (Envelope)_webMercator.ToGeographic(g.Geometry);                
+                DownloadExtent = (Envelope)_webMercator.ToGeographic(g.Geometry);
+                //Console.WriteLine($"{_startPoint.X} {_startPoint.Y} {endPoint.X} {endPoint.Y}");
+                //Console.WriteLine($"{DownloadExtent.XMin} {DownloadExtent.YMin} {DownloadExtent.XMax} {DownloadExtent.YMax}");
+                //var bb = (Envelope)_webMercator.FromGeographic(DownloadExtent);
+                //Console.WriteLine($"{bb.XMin} {bb.YMin} {bb.XMax} {bb.YMax}");
+
                 NotifyPropertyChanged(p => p.DownloadExtent);
                 NotifyPropertyChanged(p => p.IsDrawExtentTipVisible);                
             }
@@ -490,8 +526,7 @@ namespace PBS.APP.ViewModels
             if (PropertyChanged == null)
                 return;
 
-            var memberExpression = propertySelector.Body as MemberExpression;
-            if (memberExpression == null)
+            if (!(propertySelector.Body is MemberExpression memberExpression))
                 return;
 
             PropertyChanged(this, new PropertyChangedEventArgs(memberExpression.Member.Name));
